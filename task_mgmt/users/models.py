@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from tasks.models import Task
-# Create your models here.
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password):
@@ -9,6 +8,7 @@ class UserManager(BaseUserManager):
             raise ValueError('Email is required')
         user = self.model(email=self.normalize_email(email))
         user.set_password(password)
+        user.is_active = True
         user.save(using=self._db)
         return user
     
@@ -16,13 +16,13 @@ class UserManager(BaseUserManager):
         user = self.create_user(email, password)
         user.is_staff = True
         user.is_superuser = True
+        user.is_active = True
         user.save(using=self._db)
         return user
 
 class User(AbstractUser):
     email = models.EmailField(unique=True, max_length=255)
     username = models.CharField(unique=False, max_length=10)
-    tasks = models.ForeignKey(Task, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.username
