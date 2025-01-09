@@ -63,11 +63,6 @@ class TaskSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return Task.objects.create(**validated_data)
 
-
-    # Limits the task list to tasks created by the logged-in user.
-    def get_queryset(self):
-        return self.queryset.filter(creator=self.request.user)
-
 class UserSerializer(serializers.ModelSerializer):          # Nested Serializer
     tasks = TaskSerializer(many=True, read_only=True)
 

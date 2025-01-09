@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import permissions
-from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.filters import SearchFilter, OrderingFilter, BaseFilterBackend
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend, OrderingFilter
@@ -15,6 +15,11 @@ from django.utils.timezone import now
 
 User = get_user_model()
 
+class IsOwnerFilterBackend(BaseFilterBackend):
+    #   Filter that only allows users to see their own objects.
+        def filter_queryset(self, request, queryset, view):
+            return queryset.filter(creator=request.user)
+
 class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
@@ -23,12 +28,12 @@ class TaskViewSet(ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [IsOwnerFilterBackend]
     filterset_fields = ['status', 'priority_level', 'due_date']
     ordering_fields = ['due_date', 'priority_level']
-
-    """ def get_queryset(self):
-        return Task.objects.filter(creator=self.request.user) """
+        
+    def get_queryset(self):
+        return Task.objects.filter(creator=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)     # Pass the user to the serializer
@@ -51,3 +56,4 @@ class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
+    #filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter, IsOwnerFilterBackend]
