@@ -7,6 +7,7 @@ API Endpoints:
 HTTP        Method_Endpoint                 Description
 POST        /register/                      User registration
 POST	    /login/                         User login (get tokens)
+GET         /users/                         List all tasks under authenticated user
 GET         /tasks/                         List all tasks
 POST	    /tasks/                         Create a new task
 GET         /tasks/<id>/	                Retrieve a specific task
