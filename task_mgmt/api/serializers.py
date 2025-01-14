@@ -44,20 +44,20 @@ class TaskSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"Priority must be one of {priority_level}.")
         return value
     
-    # Ensures Validation for proper status updates
-    def validate_status(self, value):
-        current_status = self.instance.status if self.instance else None
-        allowed_transitions = {
-            'Pending': ['In Progress'],
-            'In Progress': ['Completed'],
-            'Completed': []
-        }
-
-        if current_status and value not in allowed_transitions.get(current_status, []):
-            raise serializers.ValidationError(
-                f"Invalid status transition from {current_status} to {value}."
-            )
-        return value
+    # Ensures proper updates
+    def update(self, instance, validated_data):
+        title = validated_data.pop('title')
+        description = validated_data.pop('description')
+        due_date = validated_data.pop('due_date')
+        priority_level = validated_data.pop('priority_level')
+        status = validated_data.pop('status')
+        instance.title = title
+        instance.description = description
+        instance.due_date = due_date
+        instance.priority_level = priority_level
+        instance.status = status
+        instance.save()
+        return instance
 
     # Automatically sets the current user as the task owner when creating a task.
     def create(self, validated_data):
